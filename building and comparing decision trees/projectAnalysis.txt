@@ -1,0 +1,1446 @@
+---
+title: "SCC.461 Final Assignment"
+author: '36358786'
+date: "2023-01-09"
+output: 
+  bookdown::pdf_document2:
+    toc: false
+bibliography: reference.bib
+csl: pnas.csl
+classoption: a4paper
+abstract: "This study compares two different decision tree classifiers, one I implemented in python and the other, from an already existing python library in Scikit-Learn (sklearn) package. The “Haberman” dataset was downloaded from the UCI Machine Learning Repository to be used for the analysis for these two classifiers. The dataset was run through the implemented decision tree classifier and the existing one from Scikit-Learn. Analytical information, both computational and machine learning aspects were taken, such as memory used, training time, accuracy, precision, f1 score, and recalls. This information was then extracted for both classifiers to be used. Following the data extraction from these two classifiers, more research will be done using R programming for statistical analysis. This essay will explore the particulars and draw comparisons between the implemented decision tree and the decision tree from Scikit-Learn."
+
+---
+
+
+```{r setup, include=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(fig.width = 8, fig.height = 2)
+library(dplyr)
+library(ggplot2)
+library(stats)
+library(knitr)
+library(broom)
+library(gridExtra)
+```
+
+
+#  Introduction
+
+Machine learning classification involves breaking down vast amounts of data into
+smaller categories using methodologies and algorithms. 
+Machine learning classification methods come in a wide variety. 
+Some just do classifications, whereas others are also capable of performing 
+additional tasks.The decision trees classifiers are the main emphasis of this 
+work. Not only does it focus on decision trees, but also implement one and 
+compare it to the Decision tree from the library Scikit – Learn @scikit-learn. 
+These comparisons will be done on some computational and analytical data 
+extracted from implementing both classifiers on a dataset. The implementation 
+and the extraction of data will be done in python, and the statistical 
+comparisons will be done in R programming.
+
+Data modelling is done using a decision tree classifier, a machine learning 
+technique. By using this method, a tree-like structure made up of "branches," 
+each indicating a comparison of values and/or conditions, is produced. 
+These branches are called decision nodes, and the leaves that emerge from them 
+are called final branches. Each leaf indicates a distinct class into which the 
+data may be divided. The decision tree works by first building the branches, 
+then focusing the data until a conclusion is reached @DTanaly. 
+The most crucial attribute is chosen at each stage until the data 
+is appropriately categorised. A decision tree is very useful when dealing with
+huge files and complicated factors because of its ability for good visualisation
+@dtvisuals. 
+All these descriptions and stages depend on certain factors and hyperparameters 
+such the maximum depth, minimum split, information gain and others. 
+The implementation of this in python will be further discussed later in this 
+report, and this will explain some of these factors and hyperparameters.
+
+The computational and machine learning analytical aspects that will be 
+considered for this project is the memory used, training time, accuracy, 
+precision, f1 score and recall. Memory used will measure the memory capacity 
+used in training the dataset. The proportion of correctly detected examples 
+(true positives and true negatives) among all cases is known as accuracy. 
+Recall is the percentage of true positives out of all instances that were 
+actually positive (i.e., true positives and false negatives), while precision 
+is the proportion of true positives out of all instances that were classified 
+as positive (i.e., true positives and false positives), and f1 score is the 
+harmonic mean of accuracy and precision @accPF. 
+When handling imbalanced data however, f1 score is the most common option used.
+
+In the statistical comparison in R, tests like linear regression, t- test, 
+and graphical representations will be done on the data extracted from python 
+analysis. These will be explained and elaborated later in this report.
+
+
+#  Methodology
+
+This section of the report will explain the python implementation of the 
+decision tree and a highlight on the work done in R.  The task of this project 
+is to implement a decision tree classifier in python and compare it to an 
+already existing decision tree of a library (Scikit- learn). To do these 
+comparisons, the computational aspects (memory used, training time) and the 
+machine learning aspects (accuracy, precision, f1 score, recalls) must be 
+considered. These information about the decision trees will then be extracted 
+as csv files from python and imported in R for the statistical analysis and 
+comparisons. The “Haberman” dataset from UCI machine learning repository will 
+be used for this task. The description of the python codes will and highlights 
+on the R codes will be given. However, the algorithm of building a decision tree
+must be first understood.
+
+In a decision tree, just as a tree starts building from the roots, then grows 
+up until the leaves(predictions). By comparing the values of the root attribute 
+with those of the record (actual dataset) attribute, this algorithm tracks the 
+branch and moves to the next node. 
+
+Before moving on to the next node, the algorithm double-checks the attribute 
+value with the other sub-nodes. This continues until it reaches the leaf node of
+the tree. The following algorithm can help you better understand the
+entire procedure @jp_decision_tree:
+
+The beginning point should be the root node of the tree, which holds the 
+complete dataset and is symbolised, for instance, by S. The best attribute in 
+the dataset is then found using a collection of features and thresholds. 
+It is best to build subsets of the S that contain potential values for the best 
+characteristics. The best attribute-containing decision tree node is then 
+produced. Then, using the subsets, you proceed to expand the tree recursively 
+until you reach the leaf node, where the node can no longer be classed.
+
+The idea behind the python decision tree implementation is as follows:
+Definitions needed to be made for the ensuing elements. The Node class will 
+gather and store the parameters, characteristics, and threshold necessary to 
+partition the data into left and right nodes as the initial phase. The Decision 
+Tree Node class is the other one that needs to be made. This will outline the 
+decision tree classifier's reasoning, along with the fit and forecast algorithms. 
+The predict method will be used to provide predictions based on the fresh 
+data, while the fit method will be in charge of building the decision tree using
+the training data. The halting criterion must also be taken into account. This 
+specifies the circumstances in which the growth of trees should come to an end. 
+The maximum depth and the minimum sample split are two examples of these 
+requirements.
+
+To begin with the process in the python implementation codes, the code defines 
+two classes: DecisiontreeNode and DecisionTree_Classifier. This model, however, 
+was built to take X as the columns of the dataset without the last column, and 
+the last column refers to the y. For this implementation to work, the classes 
+must be set in the last column of your dataset.
+The DecisiontreeNode class, which has characteristics like feature, threshold, 
+left, right, info gain, and content, represents a node in the decision tree. 
+The left and right attributes are used to record the left and right subtrees, 
+respectively, and the feature and threshold attributes are utilised for 
+decision nodes. The content attribute is used for leaf nodes to hold the class 
+label, while the info gain attribute is used to store the information gain 
+connected to the split at that node.
+The DecisionTree_Classifier class represents the decision tree classifier, and 
+has several methods to create, train, and predict using the decision tree.
+The init method of DecisionTree_Classifier, initializes the class by setting the
+'min_samples_split' and 'max_depth' parameters, and 'criterion' which is none by
+default. Additionally, it produces an empty "root" property that will later be 
+used to hold the decision tree's root node.
+
+The fit method of DecisionTree_Classifier, is used to train the decision tree on
+a given dataset (X, y). This method invokes the grow_tree method, which uses the
+dataset to recursively grow the tree to the left and right nodes under specific 
+conditions.
+
+The grow_tree method, which is recursive, splits the data at each node depending
+on the best feature and threshold in order to construct the decision tree. The 
+method takes three inputs: the dataset X, the labels y, and 
+an optional depth parameter. 
+It first calculates the number of unique labels n_labels in the dataset, and 
+the number of samples samples_total and features features_total in the dataset.
+Next, it checks if any of the stopping criteria have been met:
+If the number of samples is less than the minimum sample split or the depth of 
+the tree is greater than the maximum depth or the number of unique labels is 
+equal to one, the method creates a leaf node by calling the _cal_leaf method 
+and passing it the current set of labels, it returns the leaf node. These are 
+the conditions for which the tree stops growing, otherwise it continues to the 
+next step.
+The method calls the get_best_split method passing it the current dataset and 
+labels, this method finds the best feature and threshold to split the data by 
+evaluating the information gain of each possible split based on the criterion 
+selected, thus either gini or entropy.
+After determining the best split, it calls the grow tree method and passes it 
+the left subset of the data and left subset of the labels, recursively growing 
+the left subtree and raising the depth by 1.The right subtree is then grown by 
+recursively running the grow tree method once more, feeding it the correct 
+subset of data and labels, and raising the depth by 1.
+The method returns a DecisiontreeNode object with the feature, threshold, left 
+and right subtrees, and the information gain of the best split.This grow_tree 
+method is called until a point where the node cannot further be split. The grow 
+tree method calls on two helper functions, the _cal_leaf and the get_best_split 
+methods.
+
+The value of a leaf node in the decision tree is determined using the _cal_leaf 
+method. It returns the class label with the highest frequency among the labels 
+that were supplied to it, depending on the implementation.
+
+
+The get_best_split method is used to get the ideal feature and threshold to split 
+the data at a specific node. It takes three inputs: the dataset X, the 
+labels y, and the number of features num_features. The method Initializes a 
+dictionary best_split with default values for feature index, threshold, left and
+right subsets of data and labels, and information gain. It then iterates over 
+all the features to get get all the unique values of that feature in the current
+dataset and for each feature splits the data into the left and right subsets 
+using the data_split method.
+The importance of each split is then determined by comparing the parent node's 
+impurity to the total of the child nodes' impurities, using an impurity 
+determined by the information gained from the comparison. The information gain 
+calculated is based on the criterion selected, that is either “gini” or 
+“entropy”.If the information gain of the current split is greater than the 
+information gain, the best_split dictionary is updated with the current feature,
+threshold,left and right subsets of data and labels, and the information gain of
+the current split.It returns the best_split dictionary which contains feature, 
+threshold, left and right subset of data and labels, and information gain of 
+the best split.
+
+The helper method, the data_split is created. The dataset is split into left and
+right subsets using the feature and threshold values provided by this approach. 
+This is accomplished by creating a mask that keeps all records that meet the 
+criteria that the feature must be smaller than or equal to the threshold for the
+left subset and the inverse for the right subset.
+
+The information_gain method is used to calculate the information gained 
+associated with a given split. It is used to calculate the information gained 
+based on the criterion chosen for the decision tree classifier. This also 
+contain some helper functions, gini_index and entropy. 
+
+The gini_index method is used to calculate the gini impurity of a set of labels.
+Gini impurity is a measurement of the likelihood that a randomly selected 
+element from the set would be incorrectly classified if it were labelled using 
+the distribution of the labels in the set @zhou_gini.
+
+The entropy method is used to calculate the entropy of a set of labels. Entropy 
+is a metric for how disorderly or impure a set is @entTds. 
+To determine the threshold of feature to be used for data split at each node, 
+the information gained is used. This is either calculated using gini or entropy.
+
+Based on the feature values of the new data, the predict method is used to 
+predict the target variable for fresh data by traversing the tree from the root 
+to a leaf node. As it descends the tree, it calls itself repeatedly, comparing 
+each level's feature with the node's threshold to determine whether to go left 
+or right. The prediction is sent back as the class label connected to the leaf 
+node. It also performs calculations using a helper function.
+
+
+The prediction_helper function takes the X and tree parameters. This is used to 
+traverse through the tree based on certain conditions and features to return a 
+node. This process happens recursively until a leaf is reached.
+
+
+After the implementation, the decision tree classifier was tested on the 
+“Haberman” dataset and it worked well.
+To get the csv files for the R comparison analysis, first, conditions for any 
+results must be the same for the implemented decision tree and the Scikit-learn 
+decision tree. 
+A decision was made to make the comparisons based on the training size, 
+criterion, min_samples_split and max_depth. A range of values were selected on 
+which set conditions were iterated over, gathering information on the training 
+time, memory used, accuracy f1 score and recall. These were done for training 
+size, min_sample_split and the maximum depth. For the criterion, the set 
+conditions were iterated over “gini” and “entropy”, and similar information were
+collected. The same procedure and processes were performed on the Scikit-learn 
+decision tree. In the end, eight csv files were extracted, four for each 
+classifier, for the analysis to be done in R.
+
+
+In R, the necessary libraries are first loaded. the files are loaded based on 
+the parameter for which the comparison is being performed on. The csv file for 
+that parameter for the implemented decision tree and the Scikit-learn decision 
+tree are loaded, creating two dataframes. The two dataframes are merged on the 
+parameter for comparison to form another dataframe. Linear regressions are 
+performed for all computational and machine learning results. Graphs such as 
+line plots and bar charts are also created using ggplot. T- tests are also 
+performed on data where it is possible. This is repeated for all parameters on 
+which comparisons are being made on.
+
+
+
+#  Results
+
+
+##  Analysis Based on size
+```{r, echo=FALSE}
+# 1.load csv files generated by python for comparison on problem_size
+decision_tree_df <- read.csv("Implementation_size")
+sklearn_tree_df <- read.csv("sk_problemSize")
+
+#merge data on problem size
+size_df = full_join(decision_tree_df, sklearn_tree_df, by = "size")
+
+```
+###  Memory Usage
+```{r , echo=FALSE, fig.cap= "test results of memory used based on size"}
+#performing the wilcoxon signed-rank test
+test_results <-wilcox.test(decision_tree_df$memory.used.bytes., 
+                           sklearn_tree_df$memory.used.bytes., 
+                           alternative = "two.sided", paired = TRUE,
+                           exact= FALSE)
+#paste("size_memUsed :" ,test_results$p.value)
+#[1] "size_memUsed : 0.725963626250157"
+
+#performing a t-test
+m<-t.test(decision_tree_df$memory.used.bytes., 
+           sklearn_tree_df$memory.used.bytes.)
+#extract the p-value, t, mean x and mean y
+#extract the p-value, t, mean x and mean y
+#extract the p-value, t, mean x and mean y
+p<- m$p.value
+t<- m$statistic
+mx <- mean(decision_tree_df$memory.used.bytes.)
+my <- mean(sklearn_tree_df$memory.used.bytes.)
+pw <- test_results$p.value
+
+#creatiing a dataframe
+data_m<- data.frame(p_value = p, t_value = t, 
+                    mean_I = mx, mean_sk = my,
+                    p_value_wilcox = pw)
+#creating a table
+kable(data_m)
+
+
+```
+```{r, fig.cap="memory used against size"}
+## Visualize the results using line plot 
+ggplot(size_df, aes(x = size)) +
+  geom_line(aes(y = memory.used.bytes..x, color = "Implemetation")) +
+  geom_line(aes(y = memory.used.bytes..y, color = "sk_learn")) + 
+   xlab("Problem size") + 
+  ylab("memory used")
+```
+
+
+
+
+###  Training Time
+```{r , echo=FALSE,fig.cap="test results of training time based on size"}
+#performing the wilcoxon signed-rank test
+time_results <-wilcox.test(decision_tree_df$training.time, 
+                           sklearn_tree_df$training.time, 
+                           alternative = "two.sided", paired = TRUE, exact= FALSE)
+#paste("size_time :" ,test_results$p.value)
+#[1] "size_time : 0.725963626250157"
+
+#performing a t-test
+tr <- t.test(decision_tree_df$training.time, sklearn_tree_df$training.time)
+#extract the p-value, t, mean x and mean y
+p1<- tr$p.value
+t1<- tr$statistic
+mx1 <- mean(decision_tree_df$training.time)
+my1 <- mean(sklearn_tree_df$training.time)
+pw1 <- time_results$p.value
+
+#creatiing a dataframe
+data_tr<- data.frame(p_value = p1, t_value = t1, 
+                    mean_I = mx1, mean_sk = my1,
+                    p_value_wilcox = pw1)
+#creating a table
+kable(data_tr)
+
+
+```
+```{r, echo=FALSE, fig.cap="training time against size"}
+# Visualize the results using line plot 
+ggplot(size_df, aes(x = size)) +
+  geom_line(aes(y = training.time.x, color = "Implemetation")) +
+  geom_line(aes(y = training.time.y, color = "sk_learn"))+ xlab("Problem size") + 
+  ylab("training time")
+```
+
+
+
+### Accuracy
+```{r , echo=FALSE,fig.cap="test results of accuracy based on size"}
+#performing the Wilcoxon-Mann-Whitney signed-rank test
+acc_results <-wilcox.test(decision_tree_df$accuracy, 
+                           sklearn_tree_df$accuracy, 
+                           alternative = "two.sided", exact= FALSE)
+#paste("accuracy :" ,test_results$p.value)
+#[1] "accuracy : 0.725963626250157"
+
+#performing a t-test
+ac<-t.test(decision_tree_df$accuracy, sklearn_tree_df$accuracy)
+
+#extract the p-value, t, mean x and mean y
+p12<- ac$p.value
+t12<- ac$statistic
+mx12 <- ac$estimate
+pw12 <- acc_results$p.value
+
+#creatiing a dataframe
+data_ac<- data.frame(p_value = p12, t_value = t12, 
+                    estimate_means = mx12, 
+                    p_value_wilcox = pw12)
+#creating a table
+kable(data_ac)
+
+```
+```{r, fig.cap="accuracy against size"}
+# Visualize the results using line plot 
+plotA<- ggplot(size_df, aes(x = size)) +
+  geom_line(aes(y = accuracy.x, color = "Implemetation")) +
+  geom_line(aes(y = accuracy.y, color = "sk_learn")) + xlab("Problem size") + 
+  ylab("accuracy")
+```
+
+
+### Precision
+```{r precision, echo=FALSE, fig.cap="test results of precision based on size"}
+#performing the Wilcoxon-Mann-Whitney signed-rank test
+pre_results <-wilcox.test(decision_tree_df$precision, 
+                           sklearn_tree_df$precision, 
+                           alternative = "two.sided", exact= FALSE)
+#paste("precision :" ,pre_results$p.value)
+#[1] "precision : 0.87464301483539"
+
+#performing a t-test
+pr<-t.test(decision_tree_df$precision, sklearn_tree_df$precision)
+#extract the p-value, t, mean x and mean y
+p13<- pr$p.value
+t13<- pr$statistic
+mx13 <- pr$estimate
+pw13 <- pre_results$p.value
+
+#creatiing a dataframe
+data_pr<- data.frame(p_value = p13, t_value = t13, 
+                    estimate_means = mx13, 
+                    p_value_wilcox = pw13)
+#creating a table
+kable(data_pr)
+
+```
+```{r, fig.cap="precision against size"}
+# Visualize the results using line plot 
+plotP<- ggplot(size_df, aes(x = size)) +
+  geom_line(aes(y = precision.x, color = "Implemetation")) +
+  geom_line(aes(y = precision.y, color = "sk_learn")) + xlab("Problem size") + 
+  ylab("precision")
+```
+```{r, fig.cap = "accuracy(left) and precision(right) against size"}
+#combining accuracy and precision to save space
+grid.arrange(plotA, plotP, ncol=2, nrow = 1)
+
+
+```
+
+
+### F1 score
+```{r, echo=FALSE, fig.cap="test results of f1 score based on size"}
+#performing the Wilcoxon-Mann-Whitney signed-rank test
+f_results <-wilcox.test(decision_tree_df$F1, 
+                           sklearn_tree_df$F1, 
+                           alternative = "two.sided", exact= FALSE)
+#paste("f1 score :" ,pre_results$p.value)
+#[1] "f1 score : 0.87464301483539"
+
+
+
+#performing a t-test
+f<-t.test(decision_tree_df$F1, sklearn_tree_df$F1)
+#extract the p-value, t, mean x and mean y
+p14<- f$p.value
+t14<- f$statistic
+mx14 <- f$estimate
+pw14 <- f_results$p.value
+
+#creatiing a dataframe
+data_f<- data.frame(p_value = p14, t_value = t14, 
+                    estimate_means = mx14, 
+                    p_value_wilcox = pw14)
+#creating a table
+kable(data_f)
+
+
+```
+```{r, fig.cap="f1 score against size"}
+## Visualize the results using line plot 
+plotF<- ggplot(size_df, aes(x = size)) +
+  geom_line(aes(y = F1.x, color = "Implemetation")) +
+  geom_line(aes(y = F1.y, color = "sk_learn")) + xlab("Problem size") + 
+  ylab("F1")
+```
+
+
+### Recalls
+```{r, echo=FALSE, fig.cap="test results of recall based on size"}
+#performing the Wilcoxon-Mann-Whitney signed-rank test
+rec_results <-wilcox.test(decision_tree_df$recall, 
+                           sklearn_tree_df$recall, 
+                           alternative = "two.sided", exact= FALSE)
+#paste("recall :" ,rec_results$p.value)
+#[1] "recall : 0.562371966971069"
+
+
+
+#performing a t-test
+rec<-t.test(decision_tree_df$recall, sklearn_tree_df$recall)
+#extract the p-value, t, mean x and mean y
+p15<- rec$p.value
+t15<- rec$statistic
+mx15 <- rec$estimate
+pw15 <- rec_results$p.value
+
+#creatiing a dataframe
+data_rec<- data.frame(p_value = p15, t_value = t15, 
+                    estimate_means = mx15, 
+                    p_value_wilcox = pw15)
+#creating a table
+kable(data_rec)
+```
+```{r, fig.cap="recall against size"}
+# Visualize the results using line plot 
+plotR<- ggplot(size_df, aes(x = size)) +
+  geom_line(aes(y = recall.x, color = "Implemetation")) +
+  geom_line(aes(y = recall.y, color = "sk_learn")) + 
+  ggtitle("comparison of recall against size ")+ xlab("Problem size") + 
+  ylab("recall")
+```
+```{r, fig.cap = "recall(left) and f1 score(right) against size"}
+#combining recall and f1 score to save space
+grid.arrange(plotR, plotF, ncol=2, nrow = 1)
+
+
+```
+
+
+
+## Comparison on criterion
+```{r, echo=FALSE}
+# 2.load csv files generated by python for comparison on criterion
+decision_crit_df <- read.csv("implementation_criterion")
+sklearn_crite_df <- read.csv("sk_criteria")
+
+#merge data on problem criterion
+criterion_df = full_join(decision_crit_df, sklearn_crite_df, by = "criterion")
+
+```
+
+### Memory usage
+```{r, echo=FALSE,fig.cap="test results of memory used based on criterion"}
+#performing the wilcoxon signed-rank test
+test1_results <-wilcox.test(decision_crit_df$memory.used.bytes., 
+                           sklearn_crite_df$memory.used.bytes., 
+                           alternative = "two.sided", paired = TRUE, exact= FALSE)
+#paste("size_memUsed :" ,test1_results$p.value)
+#[1] "size_memUsed : 0.371093369522698"
+
+
+#performing a t-test
+m1<-t.test(decision_crit_df$memory.used.bytes., sklearn_crite_df$memory.used.bytes.)
+#extract the p-value, t, mean x and mean y
+p2<- m1$p.value
+t2<- m1$statistic
+mx2 <- m1$estimate
+pw2 <- test1_results$p.value
+
+#creatiing a dataframe
+data_m1<- data.frame(p_value = p2, t_value = t2, 
+                    estimate_means = mx2, 
+                    p_value_wilcox = pw2)
+#creating a table
+kable(data_m1)
+
+
+```
+```{r, fig.cap= "memory used against criterion"}
+# Visualize the results
+
+plot_mm<- ggplot(criterion_df, aes(x = criterion, y = memory.used.bytes..x, 
+                         fill = "memory.used.bytes..x")) +
+  geom_col(position = "dodge") +
+  geom_col(aes(y = memory.used.bytes..y, fill = "memory.used.bytes..y"), 
+  position = "dodge") + ylab("memory used") +
+  scale_fill_manual(values = 
+        c("memory.used.bytes..x" = "blue", "memory.used.bytes..y" = "red"),
+        labels = c("implemented", 'sk_learn')) 
+```
+
+
+### Training time
+```{r, echo=FALSE, fig.cap="test results of training time based on criterion"}
+#performing the wilcoxon signed-rank test
+train1_results <-wilcox.test(decision_crit_df$training.time, 
+                           sklearn_crite_df$training.time, 
+                           alternative = "two.sided", paired = TRUE, 
+                           exact= FALSE)
+#paste("traintime :" ,train1_results$p.value)
+#[1] "traintime : 0.371093369522698"
+
+# perform a T-test 
+tr1<-t.test(decision_crit_df$training.time, sklearn_crite_df$training.time)
+#extract the p-value, t, mean x and mean y
+p21<- tr1$p.value
+t21<- tr1$statistic
+mx21 <- tr1$estimate
+pw21<- train1_results$p.value
+
+#creatiing a dataframe
+data_tr1<- data.frame(p_value = p21, t_value = t21, 
+                    estimate_means = mx21, 
+                    p_value_wilcox = pw21)
+#creating a table
+kable(data_tr1)
+
+
+
+```
+
+```{r, fig.cap= "training time against criterion"}
+# Visualize the results
+
+plot_tr<- ggplot(criterion_df, aes(x = criterion, y = training.time.x, 
+                         fill = "training.time.x")) +
+  geom_col(position = "dodge") +
+  geom_col(aes(y = training.time.y, fill = "training.time.y"), 
+           position = "dodge") + ylab("training time") +
+  scale_fill_manual(values = 
+                      c("training.time.x" = "blue", "training.time.y" = "red"),
+                    labels = c("implemented", 'sk_learn')) 
+
+```
+
+```{r, fig.cap = "memoryUsed(left) and train time(right) against criterion"}
+#combining memory used and training time to save space
+grid.arrange(plot_mm, plot_tr, ncol=2, nrow = 1)
+
+
+```
+
+
+### Accuracy, Precision
+```{r, echo=FALSE}
+acc1_results <-wilcox.test(decision_crit_df$accuracy, 
+                           sklearn_crite_df$accuracy, 
+                           alternative = "two.sided", paired = TRUE, exact = FALSE)
+#paste("accuracy :" ,acc1_results$p.value)
+#[1] "accuracy : NaN"
+
+#performing a t-test
+#t.test(decision_crit_df$accuracy, sklearn_crite_df$accuracy)
+#data is essentially constant
+
+
+```
+```{r, fig.cap= "accuracy against criterion"}
+# Visualize the results using group bar plots
+plot_ac <- ggplot(criterion_df, aes(x = criterion, y = accuracy.x, 
+                         fill = "accuracy.x")) +
+  geom_col(position = "dodge") +
+  geom_col(aes(y = accuracy.y, fill = "accuracy.y"), 
+           position = "dodge") + ylab("accuracy") +
+  scale_fill_manual(values = 
+                      c("accuracy.x" = "black", "accuracy.y" = "green"),
+                    labels = c("implemented", 'sk_learn')) 
+
+```
+
+
+```{r, echo=FALSE}
+#performing the wilcoxon signed-rank test
+prec1_results <-wilcox.test(decision_crit_df$precision, 
+                           sklearn_crite_df$precision, 
+                           alternative = "two.sided", paired = TRUE, exact = FALSE)
+#paste("precision :" ,prec1_results$p.value)
+#[1] "precision : NaN"
+
+
+#performing a t-test
+#t.test(decision_crit_df$precision, sklearn_crite_df$precision)
+
+```
+
+```{r, fig.cap= "precision against criterion"}
+# Visualize the results using grouped bar plot 
+
+plot_prec <- ggplot(criterion_df, aes(x = criterion, y = precision.x, 
+                         fill = "precision.x")) +
+  geom_col(position = "dodge") +
+  geom_col(aes(y = precision.y, fill = "precision.y"), 
+           position = "dodge") + ylab("precision") +
+  scale_fill_manual(values = 
+                      c("precision.x" = "blue", "precision.y" = "red"),
+                    labels = c("implemented", 'sk_learn')) 
+```
+
+```{r, fig.cap = "accuracy(left) and precision(right) against criterion"}
+#combining accuracy and precision to save space
+grid.arrange(plot_ac, plot_prec, ncol=2, nrow = 1)
+
+
+```
+
+
+
+### f1 score, Recall
+```{r, echo=FALSE}
+#performing the wilcoxon signed-rank test
+f11_results <-wilcox.test(decision_crit_df$F1, 
+                           sklearn_crite_df$F1, 
+                           alternative = "two.sided", paired = TRUE, exact = FALSE)
+#paste("f1 :" ,f11_results$p.value)
+#[1] "f1 : NaN"
+
+
+#performing a t-test
+#t.test(decision_crit_df$F1, sklearn_crite_df$F1)
+```
+```{r, fig.cap= "f1 score against criterion"}
+# Visualize the results using grouped bar plot 
+
+plot_f1 <- ggplot(criterion_df, aes(x = criterion, y = F1.x, 
+                         fill = "F1.x")) +
+  geom_col(position = "dodge") +
+  geom_col(aes(y = F1.y, fill = "F1.y"), 
+           position = "dodge") + ylab("f1 score") +
+  scale_fill_manual(values = 
+                      c("F1.x" = "blue", "F1.y" = "grey"),
+                    labels = c("implemented", 'sk_learn')) 
+
+```
+
+
+
+```{r, echo=FALSE}
+
+#performing the wilcoxon signed-rank test
+recall1_results <-wilcox.test(decision_crit_df$recall, 
+                           sklearn_crite_df$recall, 
+                           alternative = "two.sided", paired = TRUE, exact = FALSE)
+#paste("recall :" ,recall1_results$p.value)
+#[1] "recall : NaN"
+
+#perform a T-test 
+#Can't be performed
+```
+```{r, fig.cap= "recall against criterion"}
+# Visualize the results using grouped bar plot 
+
+plot_rec <-ggplot(criterion_df, aes(x = criterion, y = recall.x, 
+                         fill = "recall.x")) +
+  geom_col(position = "dodge") +
+  geom_col(aes(y = F1.y, fill = "F1.y"), 
+           position = "dodge") + ylab(" recalls") +
+  scale_fill_manual(values = 
+                      c("recall.x" = "yellow", "F1.y" = "pink"),
+                    labels = c("implemented", 'sk_learn')) 
+
+```
+```{r, fig.cap="f1 score(left) and recall(right) against criterion" }
+#combining f1 score and recall to save space
+grid.arrange(plot_f1, plot_rec, ncol=2, nrow = 1)
+
+```
+
+
+## Comparison on minimum sample split
+```{r, echo=FALSE}
+#load csv files generated by python for comparison on minimum sample split
+decision_minsamp_df <- read.csv("implementation_minSamp")
+sklearn_minsamp_df <- read.csv("sk_minSample")
+
+#merge data on problem min_sample_split
+minsample_df = full_join(decision_minsamp_df, sklearn_minsamp_df, by = "min_sample_split")
+
+```
+
+### a. Memory used
+```{r, echo=FALSE, fig.cap="test results of memory used based on min_samples_s"}
+#performing the wilcoxon signed-rank test
+test11_results <-wilcox.test(decision_minsamp_df$memory.used.bytes., 
+                           sklearn_minsamp_df$memory.used.bytes., 
+                           alternative = "two.sided", paired = TRUE,
+                           exact= FALSE)
+#paste("size_memUsed :" ,test11_results$p.value)
+#[1] "size_memUsed : 1.23918166156719e-09"
+
+#performing a t-test
+m2<-t.test(decision_minsamp_df$memory.used.bytes., 
+       sklearn_minsamp_df$memory.used.bytes.)
+
+#extract the p-value, t, mean x and mean y
+p3<- p<- format(m2$p.value, scientific = TRUE)
+t3<- m2$statistic
+mx3 <- m2$estimate
+pw3 <- format(test11_results$p.value, scientific = TRUE)
+
+#creatiing a dataframe
+data_m2<- data.frame(p_value = p3, t_value = t3, 
+                    estimate_means = mx3, 
+                    p_value_wilcox = pw3)
+#creating a table
+kable(data_m2)
+
+```
+```{r, fig.cap= "memory used against minimun samples split"}
+## Visualize the results using line plot 
+pl_memo<- ggplot(minsample_df, aes(x = min_sample_split)) +
+  geom_line(aes(y = memory.used.bytes..x, color = "Implemetation")) +
+  geom_line(aes(y = memory.used.bytes..y, color = "sk_learn")) + xlab("min_sample_split") + 
+  ylab("memory used")
+```
+
+
+
+### training time
+```{r, echo=FALSE, fig.cap="test results of train time based on min_samples_s"}
+#performing the wilcoxon signed-rank test
+train21_results <-wilcox.test(decision_minsamp_df$training.time, 
+                           sklearn_minsamp_df$training.time, 
+                           alternative = "two.sided", paired = TRUE, 
+                           exact= FALSE)
+#paste("time :" ,train21_results$p.value)
+#[1] "time : 1.6835816246647e-09"
+
+
+#performing a t-test
+tr2<-t.test(decision_minsamp_df$training.time, sklearn_minsamp_df$training.time)
+#extract the p-value, t, mean x and mean y
+p31<- p<- format(tr2$p.value, scientific = TRUE)
+t31<- tr2$statistic
+mx31 <- tr2$estimate
+pw31 <- format(train21_results$p.value, scientific = TRUE)
+
+#creatiing a dataframe
+data_tr2<- data.frame(p_value = p31, t_value = t31, 
+                    estimate_means = mx31, 
+                    p_value_wilcox = pw31)
+#creating a table
+kable(data_tr2)
+
+
+```
+```{r, fig.cap= "training time against minimun samples split"}
+## Visualize the results using line plot 
+pl_tra<- ggplot(minsample_df, aes(x = min_sample_split)) +
+  geom_line(aes(y = training.time.x, color = "Implemetation")) +
+  geom_line(aes(y = training.time.y, color = "sk_learn")) + 
+  xlab("min_sample_split") + ylab("training time")
+```
+```{r, fig.cap="memory used(left) and training time(right) against max_SamSplit"}
+#combining memory used and training time to save space
+grid.arrange(pl_memo, pl_tra, ncol=2, nrow = 1)
+
+```
+
+
+
+
+```{r, echo=FALSE}
+### Accuracy
+
+#performing the wilcoxon signed-rank test
+acc21_results <-wilcox.test(decision_minsamp_df$accuracy, 
+                           sklearn_minsamp_df$accuracy, 
+                           alternative = "two.sided",  exact= FALSE)
+#paste("accuracy :" ,acc21_results$p.value)
+#[1] "accuracy : NaN"
+
+#performing a t-test
+#t.test(decision_minsamp_df$accuracy, sklearn_minsamp_df$accuracy)
+#essentially constant
+
+```
+```{r, fig.cap= "accuracy against minimun samples split"}
+## Visualize the results using line plot 
+plot_acc1 <- ggplot(minsample_df, aes(x = min_sample_split)) +
+  geom_line(aes(y = accuracy.x, color = "Implemetation")) +
+  geom_line(aes(y = accuracy.y, color = "sk_learn")) + 
+  xlab("min_sample_split") + ylab("accuracy")
+```
+
+
+
+### precision
+```{r, echo=FALSE, fig.cap="test results of precision based on min_samples_s"}
+
+#performing the wilcoxon signed-rank test
+prec21_results <-wilcox.test(decision_minsamp_df$precision, 
+                           sklearn_minsamp_df$precision, 
+                           alternative = "two.sided", paired = TRUE, exact= FALSE)
+#paste("precision :" ,prec21_results$p.value)
+#[1] "precision : NaN"
+
+#performing a t-test
+pr2<-t.test(decision_minsamp_df$precision, sklearn_minsamp_df$precision)
+
+#extract the p-value, t, mean x and mean y
+p32<- pr2$p.value
+t32<- pr2$statistic
+mx32 <- pr2$estimate
+pw32 <- prec21_results$p.value
+
+#creatiing a dataframe
+data_pr2<- data.frame(p_value = p32, t_value = t32, 
+                    estimate_means = mx32, 
+                    p_value_wilcox = pw32)
+#creating a table
+kable(data_pr2)
+
+
+
+```
+```{r, fig.cap= "precision against minimun samples split"}
+## Visualize the results using line plot 
+plot_pre1<- ggplot(minsample_df, aes(x = min_sample_split)) +
+  geom_line(aes(y = precision.x, color = "Implemetation")) +
+  geom_line(aes(y = precision.y, color = "sk_learn")) + 
+  xlab("min_sample_split") + ylab("precision")
+
+```
+
+```{r, fig.cap="accuracy(left) and precision(right) against minimum samples split" }
+#combining accuracy and precision to save space
+grid.arrange(plot_acc1, plot_pre1, ncol=2, nrow = 1)
+
+```
+
+### f1 score
+```{r echo=FALSE, fig.cap="test results of f1 score based on min_samples_s"}
+#performing the wilcoxon signed-rank test
+f121_results <-wilcox.test(decision_minsamp_df$F1, 
+                           sklearn_minsamp_df$F1, 
+                           alternative = "two.sided", paired = TRUE, exact= FALSE)
+#paste("f1 :" ,f121_results$p.value)
+#"f1 : NaN"
+
+#performing a t-test
+f2<-t.test(decision_minsamp_df$F1, sklearn_minsamp_df$F1)
+
+#extract the p-value, t, mean x and mean y
+p33<- f2$p.value
+t33<- f2$statistic
+mx33 <- f2$estimate
+pw33 <- f121_results$p.value
+
+#creatiing a dataframe
+data_f2<- data.frame(p_value = p33, t_value = t33, 
+                    estimate_means = mx33, 
+                    p_value_wilcox = pw33)
+#creating a table
+kable(data_f2)
+
+
+```
+```{r, fig.cap= "f1 score against minimun samples split"}
+## Visualize the results using line plot 
+plot_f2<-ggplot(minsample_df, aes(x = min_sample_split)) +
+  geom_line(aes(y = F1.x, color = "Implemetation")) +
+  geom_line(aes(y = F1.y, color = "sk_learn")) + 
+  xlab("min_sample_split") + ylab("F1")
+
+```
+
+
+
+
+### recalls
+```{r, echo=FALSE, fig.cap="test results of recall based on min_samples_s"}
+#performing the wilcoxon signed-rank test
+recall21_results <-wilcox.test(decision_minsamp_df$recall, 
+                           sklearn_minsamp_df$recall, 
+                           alternative = "two.sided", paired = TRUE, exact= FALSE)
+#paste("recall :" ,recall21_results$p.value)
+#[1] "recall : NaN"
+
+#performing a t-test
+rec2<-t.test(decision_minsamp_df$recall, sklearn_minsamp_df$recall)
+#extract the p-value, t, mean x and mean y
+p34<- rec2$p.value
+t34<- rec2$statistic
+mx34 <- rec2$estimate
+pw34 <- recall21_results$p.value
+
+#creatiing a dataframe
+data_rec2<- data.frame(p_value = p34, t_value = t34, 
+                    estimate_means = mx34, 
+                    p_value_wilcox = pw34)
+#creating a table
+kable(data_rec2)
+
+```
+```{r, fig.cap= "recall against minimun samples split"}
+#Visualize the results using line plot 
+plot_rec2<- ggplot(minsample_df, aes(x = min_sample_split)) +
+  geom_line(aes(y = recall.x, color = "Implemetation")) +
+  geom_line(aes(y = recall.y, color = "sk_learn")) + xlab("min_sample_split") + 
+  ylab("recall")
+
+```
+```{r, fig.cap="f1 score(left) and recall(right) against minimum samples split" }
+#combining f1 score and recall to save space
+grid.arrange(plot_f2, plot_rec2, ncol=2, nrow = 1)
+
+```
+
+
+
+## Comparison on maximum depth
+```{r, echo=FALSE}
+# load csv files generated by python for comparison on maximum depth
+decision_maxdepth_df <- read.csv("implementation_maxdepth")
+sklearn_maxdepth_df <- read.csv("sk_maxdepth")
+
+#merge data on problem max_depth
+maxdepth_df = full_join(decision_maxdepth_df, sklearn_maxdepth_df, by = "max_depth")
+
+```
+
+### memory used
+```{r, echo=FALSE, fig.cap="test results of memory used based on max_depth"}
+#performing the wilcoxon signed-rank test
+test21_results <-wilcox.test(decision_maxdepth_df$memory.used.bytes., 
+                           sklearn_maxdepth_df$memory.used.bytes., 
+                           alternative = "two.sided", paired = TRUE, 
+                           exact= FALSE)
+#paste("size_memUsed :" ,test21_results$p.value)
+#[1] "size_memUsed : 2.73511217834889e-05"
+
+#performing a t-test
+m3<-t.test(decision_maxdepth_df$memory.used.bytes., 
+       sklearn_maxdepth_df$memory.used.bytes.)
+
+#extract the p-value, t, mean x and mean y
+p4<- format(m3$p.value, scientific = TRUE)
+t4<- m3$statistic
+mx4 <- m3$estimate
+pw4 <- test21_results$p.value
+
+#creatiing a dataframe
+data_m3<- data.frame(p_value = p4, t_value = t4, 
+                    estimate_means = mx4, 
+                    p_value_wilcox = pw4)
+#creating a table
+kable(data_m3)
+
+
+```
+```{r, fig.cap= "memory used against maximum depth"}
+## Visualize the results using line plot 
+pl_mem<- ggplot(maxdepth_df, aes(x = max_depth)) +
+  geom_line(aes(y = memory.used.bytes..x, color = "Implemetation")) +
+  geom_line(aes(y = memory.used.bytes..y, color = "sk_learn")) + xlab("max_depth") + 
+  ylab("memory used")
+
+```
+
+
+
+### training time
+```{r, fig.cap="test results of training time based on max_depth"}
+#performing the wilcoxon signed-rank test
+train31_results <-wilcox.test(decision_maxdepth_df$training.time, 
+                           sklearn_maxdepth_df$training.time, 
+                           alternative = "two.sided", exact = FALSE)
+#paste("time :" ,train31_results$p.value)
+#[1] "time : 1.4326635395777e-08"
+
+#performing a t-test
+tr3<-t.test(decision_maxdepth_df$training.time, sklearn_maxdepth_df$training.time)
+#extract the p-value, t, mean x and mean y
+p41<- sprintf("%.16f",tr3$p.value)
+t41<- tr3$statistic
+mx41 <- tr3$estimate
+pw41 <- format(train31_results$p.value, scientific = TRUE)
+
+#creatiing a dataframe
+data_tr3<- data.frame(p_value = p41, t_value = t41, 
+                    estimate_means = mx41, 
+                    p_value_wilcox = pw41)
+#creating a table
+kable(data_tr3)
+
+
+```
+```{r, fig.cap= "training time against maximum depth"}
+## Visualize the results using line plot 
+pl_tr<-ggplot(maxdepth_df, aes(x = max_depth)) +
+  geom_line(aes(y = training.time.x, color = "Implemetation")) +
+  geom_line(aes(y = training.time.y, color = "sk_learn")) + 
+ xlab("max_depth") + 
+  ylab("training time")
+
+```
+```{r, fig.cap="memory used(left) and training time(right) against max_depth" }
+#combining memory used and training time to save space
+grid.arrange(pl_mem, pl_tr, ncol=2, nrow = 1)
+
+```
+
+### Accuracy
+```{r, echo=FALSE,fig.cap="test results of accuracy based on max_depth"}
+#performing the wilcoxon signed-rank test
+acc31_results <-wilcox.test(decision_maxdepth_df$accuracy, 
+                           sklearn_maxdepth_df$accuracy, 
+                           alternative = "two.sided", exact = FALSE)
+#paste("accuracy :" ,acc31_results$p.value)
+#[1] "accuracy : 0.000202606244740355"
+
+#performing a t-test
+acc3<-t.test(decision_maxdepth_df$accuracy, sklearn_maxdepth_df$accuracy)
+
+#extract the p-value, t, mean x and mean y
+p42<- acc3$p.value
+t42<- acc3$statistic
+mx42 <- acc3$estimate
+pw42 <- acc31_results$p.value
+
+#creatiing a dataframe
+data_acc3<- data.frame(p_value = p42, t_value = t42, 
+                    estimate_means = mx42, 
+                    p_value_wilcox = pw42)
+#creating a table
+kable(data_acc3)
+```
+```{r, fig.cap= "accuracy against maximum depth"}
+## Visualize the results using line plot 
+plot_acc3<- ggplot(maxdepth_df, aes(x = max_depth)) +
+  geom_line(aes(y = accuracy.x, color = "Implemetation")) +
+  geom_line(aes(y = accuracy.y, color = "sk_learn")) + xlab("max_depth") + 
+  ylab("accuracy")
+
+```
+
+
+
+### precision
+```{r, echo=FALSE, fig.cap="test results of precision based on max_depth"}
+#performing the wilcoxon signed-rank test
+pre31_results <-wilcox.test(decision_maxdepth_df$precision, 
+                           sklearn_maxdepth_df$precision, 
+                           alternative = "two.sided", exact = FALSE)
+#paste("precision :" ,pre31_results$p.value)
+#[1] "precision : 0.000811743898297786"
+
+#performing a t-test
+pr3<-t.test(decision_maxdepth_df$precision, sklearn_maxdepth_df$precision)
+
+#extract the p-value, t, mean x and mean y
+p43<- pr3$p.value
+t43<- pr3$statistic
+mx43 <- pr3$estimate
+pw43 <- pre31_results$p.value
+
+#creatiing a dataframe
+data_pr3<- data.frame(p_value = p43, t_value = t43, 
+                    estimate_means = mx43, 
+                    p_value_wilcox = pw43)
+#creating a table
+kable(data_pr3)
+
+```
+```{r, fig.cap= "precision against maximum depth"}
+## Visualize the results using line plot 
+plot_prec3<- ggplot(maxdepth_df, aes(x = max_depth)) +
+  geom_line(aes(y = precision.x, color = "Implemetation")) +
+  geom_line(aes(y = precision.y, color = "sk_learn")) + xlab("max_depth") + 
+  ylab("precision")
+```
+
+```{r, fig.cap="accuracy(left) and precision(right) against max_depth" }
+#combining accuracy and precision to save space
+grid.arrange(plot_acc3, plot_prec3, ncol=2, nrow = 1)
+
+```
+
+### f1 score
+```{r, echo=FALSE, fig.cap="test results of f1 score based on max_depth"}
+#performing the wilcoxon signed-rank test
+f131_results <-wilcox.test(decision_maxdepth_df$F1, 
+                           sklearn_maxdepth_df$F1, 
+                           alternative = "two.sided", exact = FALSE)
+#paste("precision :" ,f131_results$p.value)
+#[1] "precision : 7.78078591005077e-05"
+
+#performing a t-test
+f3<-t.test(decision_maxdepth_df$F1, sklearn_maxdepth_df$F1)
+
+#extract the p-value, t, mean x and mean y
+p44<- f3$p.value
+t44<- f3$statistic
+mx44 <- f3$estimate
+pw44 <- format(f131_results$p.value, scientific = TRUE)
+
+#creatiing a dataframe
+data_f3<- data.frame(p_value = p44, t_value = t44, 
+                    estimate_means = mx44, 
+                    p_value_wilcox = pw44)
+#creating a table
+kable(data_f3)
+
+```
+```{r, fig.cap= "f1 score against maximum depth"}
+## Visualize the results using line plot 
+plot_f3<-ggplot(maxdepth_df, aes(x = max_depth)) +
+  geom_line(aes(y = F1.x, color = "Implemetation")) +
+  geom_line(aes(y = F1.y, color = "sk_learn")) + xlab("max_depth") + 
+  ylab("F1")
+
+```
+
+
+
+### recalls
+```{r, echo=FALSE, fig.cap="test results of recall based on max_depth"}
+#performing the wilcoxon signed-rank test
+rec31_results <-wilcox.test(decision_maxdepth_df$recall, 
+                           sklearn_maxdepth_df$recall, 
+                           alternative = "two.sided", exact = FALSE)
+#paste("recall :" ,rec31_results$p.value)
+#[1] "recall : 0.00272825313577659"
+
+#performing a t-test
+rec3<-t.test(decision_maxdepth_df$recall, sklearn_maxdepth_df$recall)
+
+#extract the p-value, t, mean x and mean y
+p45<- rec3$p.value
+t45<- rec3$statistic
+mx45 <- rec3$estimate
+pw45 <- rec31_results$p.value
+
+#creating a dataframe
+data_rec3<- data.frame(p_value = p45, t_value = t45, 
+                    estimate_means = mx45, 
+                    p_value_wilcox = pw45)
+#creating a table
+kable(data_rec3)
+```
+```{r, fig.cap= "recall against maximum depth"}
+## Visualize the results using line plot 
+plot_rec3 <- ggplot(maxdepth_df, aes(x = max_depth)) +
+  geom_line(aes(y = recall.x, color = "Implemetation")) +
+  geom_line(aes(y = recall.y, color = "sk_learn")) + xlab("max_depth") + 
+  ylab("recall")
+
+```
+
+```{r, fig.cap="f1 score(left) and recall(right) against max_depth" }
+#combining f1 score and accuracy to save space
+grid.arrange(plot_f3, plot_rec3, ncol=2, nrow = 1)
+
+```
+
+#  Discussion
+
+There are a lot of statistical analysis out there. Regardless, each of those 
+analysis scale down to specific assumptions and type of the data. It is better 
+to understand your data to know the right one to use. Regardless of this, it was
+hard to assume the same nature for all the data. However, the aim of this is to 
+compare the results of the classifiers against each other, which is the topmost
+priority. The data had some ties in some features and, there were some that were
+even the same compared against each other. Wilcoxon signed 
+rank/ Wilcoxon-Mann-Whitney test, t- test (normality was assumed), and some 
+charts/plots were created. A t-test, which functions as a parametric test, can 
+be used to compare the means of two groups. The Wilcoxon Signed-Rank test is 
+the best nonparametric choice if the datasets do not meet the criteria @test.
+All these were done to at least compensate for the weaknesses of others 
+for the assumptions these methods assume. 
+
+The csv files were imported accordingly with respect to the parameter the 
+comparisons are being made on. The experiment was done on the size first, 
+followed by criteria, minimum sample, and finally maximum depth. With each of 
+these, the tests and comparisons were done in the order of memory used, training
+time, accuracy, precision, f1 and recall. The results of these will be discussed
+in the order presented.
+
+## Analysis based on size
+
+
+### Memory used
+
+The Wilcoxon ranked test produced a p-value which is way greater than the level 
+of significance 0.05, however, does not tell the full story. The t, confidence 
+level, and the means from the t-test indicate the difference in results, which 
+concludes the two are not the same, with the mean of the library decision tree 
+being slightly less than that of the implemented on. However, based on the line 
+graph, it is seen that the memory used by the library’s decision tree across all
+the sizes is almost constant, but the one for the implementation starts off very
+high but then drops significantly, and lower than that of the library’s tree 
+from a size of 0.4.
+
+
+### Training Time
+
+The Wilcoxon signed ranked produced a p-value which supports the null hypothesis
+of the classifiers performing the same @pval. The t-test however produced a totally 
+different value, which indicates the differences between both performances. The 
+means of the two clearly indicates that the Scikit-learn decision uses lesser 
+training time. The line plot goes on to prove that fact.
+
+
+### Accuracy
+
+The p-value from both the Wilcoxon Mann- Whitney test and the t-test does not 
+tell the full story but the results are quite similar, with the scikit learn 
+performing slightly better than the implemented tree. The line graph shows that, 
+they had a bit of similar reaction across the various sizes, however the 
+library’s tree is slightly better in this category averagely.
+
+
+### Precision
+
+The precision similar results as the accuracy, with the scikit learn decision 
+just getting a little bit of edge over the implement decision tree on their 
+means.
+
+### F1 Score
+
+This also produced a similar result to the accuracy and precision.
+
+### Recall
+
+The recall also produced similar result as the f1 score.
+
+
+
+## Comparisons on Criterion
+
+### Memory used
+
+From the Wilcoxon sign rank test, the p- value indicates that the classifiers 
+perform similarly. However, the t-test proves that they perform differently with
+the p-value, the t value and the means. The means gives an indication that, the 
+implemented classifier uses a lot more memory compared to the scikit-learn 
+decision tree. The bar chart also gives this indication and indicates that, the 
+results was similar for both criteria.
+
+
+### Training time
+
+The results for the training time are quite like the memory used, with the 
+implemented classifier using a lot of time compared to the scikit-learn 
+classifier. The bar plot proves this fact and indicates the gini overall takes 
+less training time compared to the entropy criterion
+
+
+### Accuracy, Precision, F1 score
+
+The Wilcoxon test gave a “NaN” and t-test was not possible for this data, 
+because they were essentially constant. The bar plot proves that they performed 
+similarly and were constant across.
+
+### Recall
+
+The tests produced similar results as in the accuracy, however the bar plot
+gives an indication that the implemented decision tree performs better in this 
+department.
+
+
+## Comparisions based on minimum samples split
+
+### a. Memory used
+
+The p-value for both Wilcoxon signed rank test and the t-test indicates that, 
+there are differences between the two classifiers. The mean indicates that the 
+implemented classifier performs better in this department, using lesser memory.
+The line plot clearly indicates this. It also shows that the scikit-learn 
+classifier uses almost the same memory across all the minimum split values, 
+however this changes at the spilt of 20 for the implemented classifier and 
+further drops after 46.
+
+
+### Training time
+
+The p-values here for both tests also indicate that, the classifiers do not 
+perform the same in this department.
+The average means suggest the scikit-learn decision tree performs better than 
+the implemented one in this department, using lesser time for training the data.
+The line plot further proves this and indicates, that the scikit-learn decision
+tree uses almost the same training time across all splits but same cannot be 
+said about the implemented classifier.
+
+
+### Accuracy
+
+The tests did not work for these sets of data because they were constant and 
+the same for both classifiers. The line plot proves they performed equally in 
+this department.
+
+### Precision
+
+The t and p-value of the t-test proves both classifiers performed equally in
+this department, also scoring the same means. The line chart proves this and 
+indicates precision drops around minimum samples split of 19 and remains 
+constant thereof.
+
+
+### F1 score, Recall
+
+The tests for the f1 score and recall produced similar results as for the
+precision, with both performing equally. The line graph proves this but 
+indicates the f1 score rises around of 18 and remains constant thereof.
+
+
+
+## Comparisons based on maximum depth
+
+### Memory used
+
+The p-values for the test indicates the classifiers perform differently. From 
+the means, it is seen that the implemented decision tree uses lesser memory 
+compared to the scikit-learn decision tree. The line plot further proves the 
+initial results, and they also produce almost the same results along all the 
+depths on the graph.
+
+
+### Training time
+
+The p-values from both the Wilcoxon test and the t test indicates, the 
+classifiers performed differently. The scikit-learn classifier averaged a 
+better time in training the dataset. The line plot further proves this fact 
+and indicates the rise in time for the implemented classifier from 3 to 
+around a depth of 7.
+
+
+### Accuracy
+
+Again, the p-value for both tests indicate a difference in the classifies, as 
+they are less than 0.05. The mean however indicated the scikit-learn decision 
+tree performing better, even though it was close. The line plot further 
+indicates how it the accuracy alternates across the depths but stay constant 
+for the implemented decision tree from a depth of around 9 thereof.
+
+
+
+### Precision, F1 score, Recall
+
+These all show similar results as from the accuracy, with the scikit- learn
+decision tree classifier performing slightly better compared to the 
+implemented decision tree.
+
+
+
+
+#  Conclusion
+
+After the implementation and the analysis of the decision tree against 
+scikit-learn decision tree, the scikit-learn performed better on an overall 
+average. However, the implemented decision tree was not far off. Regardless of 
+this, the implementation can be made better. The implementation may have some 
+few setbacks, for example how it recognises labels in a dataset. With the 
+statistical analysis in R, further statistical approaches under different 
+assumptions could be used to further explain the differences between these to 
+classifiers. Notwithstanding, the aim of these project was accomplished, 
+comparisons were able to be made to determine which classifier performed better.
+For further studies, different types of datasets can be used these on two 
+classifiers and more statistical methods can be used to draw further comparisons. 
+
+# Acknowledgement
+I would like to acknowledge the lecturers for this module for their great 
+contribution to my development and foundation to undertake this project. 
+I would also like to acknowledge the creators of these libraries: dplyr, stats,
+ggplot2, exact2x2, broom, and any other library used in the report and for
+their documentations as references.A further mention to the bibliography style 
+used, which is made available free. Finally, I would like to give the necessary 
+due to all course mates who have contributed to my development in achieving this 
+task.
+
+
+# References
+
+
+
+
+
+
